@@ -1,0 +1,138 @@
+<tr>
+<td class="classname">Attachments</td>
+<td><input id="Attach1" type="file" style="width: 300px;" class="control" ng-model="Attachone">
+</td>
+</tr>
+<tr>
+<td class="classname">Attachments</td>
+<td><input id="Attach2" type="file" style="width: 300px;" class="control" ng-model="Attachtwo">
+</td>
+</tr>
+</body>
+</html>
+
+<script type="text/javascript">
+app.controller("controllername", function ($scope, $http, $window) {
+$http({
+method: "GET",
+url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('listname')/items?$select=Title",
+headers: { "Accept": "application/json;odata=verbose" }
+})
+.success(function (data, status, headers, config) {
+$scope.listname = data.d.results;
+)}
+.error(function (data, status, headers, config) {
+});
+var userid = _spPageContextInfo.userId;
+var email = "";
+var loginName = "";
+var requestUri = _spPageContextInfo.webAbsoluteUrl + "/_api/web/getuserbyid(" + userid + ")";
+var requestHeaders = { "accept": "application/json;odata=verbose" };
+$.ajax({
+url: requestUri,
+contentType: "application/json;odata=verbose",
+headers: requestHeaders,
+success: onSuccess,
+error: onError
+});
+function onSuccess(data, request) {
+// to get login name from email address
+var logg = data.d;
+$scope.Title = logg.Title;
+loginName = logg.loginName.split('\\')[1];
+email = logg.Email.toLowerCase();
+$http({
+headers: { "Accept": "application/json;odata=verbose"
+method: "GET",
+url: 'http://yoururl' + loginName,
+cache: false,
+})
+.success(function (data, status, headers, config) {
+$scope.name = data[0].EmpName;
+})
+.error(function (data, status, headers, config) {
+alert('error in loading page');
+});
+}
+function onError() {
+alert('error on fetching userid');
+}
+$scope.submit = function() {
+var fileuploadid='';
+var validated='';
+if() {
+}
+else {
+validated = 'YES';
+}
+if(validated=='S') {
+var listName = "listname1;"
+fileuploadid = "Attach1";
+var item = "";
+var itemType = GetItemTypeForListName(listName);
+item = { "__metadata": { "type": itemtype },
+"Title": $scope.name,
+"empId": $scope.empId
+};
+}
+else if(){
+else {
+validated='YES';
+}
+if(validated=='S') {
+var listName = "listname2;"
+fileuploadid = "Attach2";
+var item = "";
+var itemType = GetItemTypeForListName(listName);
+item = { "__metadata": { "type": itemtype },
+"Title": $scope.name,
+"empId": $scope.empId
+};
+}
+$.ajax({
+url: _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName +"')/items,
+type: "POST",
+contentType: 'application/json;odata=verbose',
+data: JSON.stringify(item),
+headers: {
+'Accept': 'application/json;odata=verbose',
+'X-RequestDigest': $('#__REQUESTDIGEST').val()
+},
+success: function (data) {
+var itemId = data.d.ID;
+var fileInput = $('#'+fileuploadid);
+if(fileInput.val() !=0) {
+var fileName = fileInput[0].files[0].name;
+var reader = new FileReader();
+reader.onload = function (e) {
+var fileData = e.target.result;
+var res1 = $.ajax({
+url: _spPageContextInfo.webAbsoluteUrl +"/_api/web/lists/getbytitle('" + listName +"')/items("+itemId+")/AttachmentFiles/add(FileName='" +fileName+ "')",
+method: "POST",
+binaryStringRequestBody: true,
+data: fileData,
+processData: false,
+headers: {
+"ACCEPT": "application/json;odata=verbose",
+'X-RequestDigest': $('#__REQUESTDIGEST').val(),
+"content-length": fileData.bytelength
+},
+success: function (data) {
+},
+error: function (data) {
+alert('upload error');
+}
+});
+};
+reader.readAsArrayBuffer(fileInput[0].files[0]);
+alert("attached");
+},
+error: function error {
+alert(JSON.strinify(error));
+}
+function GetItemTypeForListName() {
+return "SP.Data." + name.charAt(0).toUppercase() + name.split(" ").join("").slice(1) + "ListItem";
+}
+})
+});
+</script>
